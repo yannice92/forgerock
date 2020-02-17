@@ -1,0 +1,20 @@
+{
+    "name": "samuelerwardi/forgerock",
+    "description": "Forgerock middleware package",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "samuelerwardi",
+            "email": "samuelerwardi@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {"App\\Forgerock\\": "src/"}
+    },
+    "require": {
+        "codercat/jwk-to-pem": "^0.0.3"
+    }
+}
+
