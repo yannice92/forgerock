@@ -13,7 +13,8 @@ add this line
 ```
 
 
-## Usage: add this line on routes/web.php
+## Usage: 
+add this line on routes/web.php
 
 ```
 $router->group(['prefix' => 'v1', 'middleware' => ['localization', 'channel','auth']], function () use ($router) {
@@ -22,12 +23,18 @@ $router->group(['prefix' => 'v1', 'middleware' => ['localization', 'channel','au
 ```
 
 ## Add Credential
-FR_SCOPE=
+FR_SCOPE= 
+
 FR_REDIRECT_URI=
+
 FR_SECRETKEY=
+
 FR_CLIENTID=
+
 FR_CLIENTID_MOBILE=
+
 FR_DOMAIN=
+
 FR_ALG=
 
 STATUS_FAILED_CODE=01
