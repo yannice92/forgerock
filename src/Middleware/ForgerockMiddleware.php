@@ -4,21 +4,29 @@
  */
 
 namespace App\Forgerock\Middlewere;
+
+use App\Forgerock\Exceptions\ForgeRockExceptions;
+use App\Forgerock\Exceptions\FRSignatureInvalidException;
 use App\Forgerock\IdentityManagement;
 use App\Forgerock\MemberPimcore;
 use App\Forgerock\SessionManagement;
+use App\Forgerock\Traits\LoggingTrait;
 use Closure;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\SignatureInvalidException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use function Sabre\Event\Loop\instance;
 
 class ForgerockMiddleware
 {
-
+    use LoggingTrait;
     /**
      * Run the request filter.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Closure $next
-     * @param  string
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure $next
+     * @param string
      * @return mixed
      * @throws \Auth0\SDK\Exception\CoreException
      */
@@ -39,53 +47,22 @@ class ForgerockMiddleware
         try {
             $sessionManagement = new SessionManagement();
             $decodedData = $sessionManagement->validateToken($token);
+        } catch (SignatureInvalidException $e) {
+            $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
+            throw new FRSignatureInvalidException($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY, Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (ExpiredException $e) {
+            $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
+            throw new ForgeRockExceptions($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY, Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (\Exception $e) {
-            var_dump($e->getMessage());die;
-            return new JsonResponse([
-                'status' => [
-                    'code' => 1,
-                    'message' => "No valid token",
-                    'errorMessage' => 'Error, No valid token'
-                ]
-            ], $responseCode);
-        } catch (\Exception $e) {
-            return new JsonResponse([
-                'status' => [
-                    'code' => 1,
-                    'message' => "Invalid token",
-                    'errorMessage' => 'Invalid token'
-                ]
-            ], 401);
-        } catch (\Exception $e) {
-            return new JsonResponse([
-                'status' => [
-                    'code' => 1,
-                    'message' => "Expired token",
-                    'errorMessage' => 'Expired token'
-                ]
-            ], 401);
-        } catch (\Exception $e) {
-            return new JsonResponse([
-                'status' => [
-                    'code' => 1,
-                    'message' => "Something wrong with server",
-                    'errorMessage' => 'Something wrong with server'
-                ]
-            ], 500);
+            $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
+            throw new ForgeRockExceptions($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         $identityManagement = new IdentityManagement();
         try {
             $memberForgeRock = $identityManagement->getMe($token);
         } catch (\Exception $e) {
-            echo $e->getMessage();
-            die;
-            return new JsonResponse([
-                'status' => [
-                    'code' => 1,
-                    'message' => "Something wrong with server",
-                    'errorMessage' => 'Something wrong with server'
-                ]
-            ], 500);
+            $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
+            throw new ForgeRockExceptions($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         $request->request->add(['memberForgeRock' => $memberForgeRock]);
         return $next($request);

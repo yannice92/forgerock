@@ -9,6 +9,7 @@
 namespace App\Forgerock;
 
 use App\Exceptions\FRExecption;
+use App\Forgerock\Exceptions\ForgeRockExceptions;
 use Illuminate\Support\Arr;
 use CoderCat\JWKToPEM\JWKConverter;
 use Firebase\JWT\JWT;
@@ -46,23 +47,16 @@ class SessionManagement extends ForgerockBase
     public function validateToken($token)
     {
         $decoded = JWT::decode($token, $this->getPEM(), [env('FR_ALG')]);
-//        var_dump($decoded->iss);
-//        var_dump($decoded->aud);
-//        var_dump($decoded);
-//        die;
-//        $eligibleIIS = [
-//            env('FR_ISS', 'https://ciamampappbsd.ciam.telkomsel.com:10010/openam/oauth2/tsel/duniagames/web'),
-//            env('FR_ISS_MOBILE', 'https://ciamampappbsd.ciam.telkomsel.com:10010/openam/oauth2/tsel/duniagames/mobile'),
-//            env('FR_ISS_TBS', 'https://ciamampapptbs.ciam.telkomsel.com:10010/openam/oauth2/tsel/duniagames/web'),
-//            env('FR_ISS_MOBILE_TBS', 'https://ciamampapptbs.ciam.telkomsel.com:10010/openam/oauth2/tsel/duniagames/mobile'),
-//        ];
-//        if (!in_array($decoded->iss, $eligibleIIS)) {
-//            throw new \Exception('Not allowed IIS', 401, 1);
-//        }
-//
-//        if (!in_array($decoded->aud, explode(',', env('FR_VALID_AUD')))) {
-//            throw new \Exception('Not valid audience', 401, 2);
-//        }
+        $eligibleIIS = [
+            env('FR_ISS', 'https://ciamamprepdapp.ciam.telkomsel.com:10003/openam/oauth2/realms/root/realms/tsel/realms/mytelkomsel/realms/web')
+        ];
+        if (!in_array($decoded->iss, $eligibleIIS)) {
+            throw new ForgeRockExceptions('Not allowed IIS', 401, 1);
+        }
+
+        if (!in_array($decoded->aud, explode(',', env('FR_VALID_AUD')))) {
+            throw new ForgeRockExceptions('Not valid audience', 401, 2);
+        }
 
         return $decoded;
     }
