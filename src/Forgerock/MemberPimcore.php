@@ -6,6 +6,8 @@
 namespace App\Forgerock;
 
 
+use App\Forgerock\Exceptions\AuthPimcoreException;
+
 final class MemberPimcore
 {
     private static $instance = null;
@@ -29,6 +31,9 @@ final class MemberPimcore
             $result = $member->findBy("forgeRockId", $memberForgeRock->_id);
             if (count($result) == 1){
                 self::$instance = $result[0];
+            }
+            else{
+                throw new AuthPimcoreException("Member not found on apps");
             }
         }
         return self::$instance;

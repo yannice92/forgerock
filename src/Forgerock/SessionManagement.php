@@ -48,7 +48,7 @@ class SessionManagement extends ForgerockBase
     {
         $decoded = JWT::decode($token, $this->getPEM(), [env('FR_ALG')]);
         $eligibleIIS = [
-            env('FR_ISS', 'https://ciamamprepdapp.ciam.telkomsel.com:10003/openam/oauth2/realms/root/realms/tsel/realms/mytelkomsel/realms/web')
+            env('FR_ISS', 'https://ciamamprepdapp.ciam.telkomsel.com:10003/openam/oauth2/realms/root/realms/tsel/realms/homelte/realms/web')
         ];
         if (!in_array($decoded->iss, $eligibleIIS)) {
             throw new ForgeRockExceptions('Not allowed IIS', 401, 1);

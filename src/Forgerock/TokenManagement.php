@@ -20,6 +20,27 @@ class TokenManagement extends ForgerockBase
         parent::__construct();
     }
 
+    public function getCode($tokenId)
+    {
+        $body = [];
+        $params = [
+            'client_id' => env('FR_CLIENTID'),
+            'redirect_uri' => env('FR_REDIRECT_URI'),
+            'response_type' => 'code',
+            'nonce' => true,
+            'scope' => env('FR_SCOPE'),
+            'csrf' => $tokenId
+        ];
+//        dd($params);
+        $headers = [
+            'Cookie' => 'iPlanetDirectoryPro=' . $tokenId,
+            'Content-Type' => 'application/json; charset=UTF-8'
+        ];
+        $response = $this->request('GET', '/iam/v1/oauth2/realms/tsel/authorize',$params,null, $headers);
+
+        return $response;
+    }
+
     public function getAccessToken($code, $isMobile = true)
     {
         $queryString = [

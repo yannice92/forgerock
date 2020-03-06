@@ -71,7 +71,6 @@ class IdentityManagement extends ForgerockBase
             'Accept' => 'application/json'
         ];
         $this->user = $this->getRequest('/iam/v1/profiles/me', $queryString, $headers);
-        dd($this->user);die;
         $this->parseData();
         return $this->user;
     }

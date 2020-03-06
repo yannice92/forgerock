@@ -60,9 +60,7 @@ class ServiceMiddleware
         } catch (\Exception $e) {
             throw new ForgeRockExceptions($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
         $memberPimcore = MemberPimcore::Instance($memberForgeRock);
-
         $request->request->add(['memberForgeRock' => $memberForgeRock]);
         $request->request->add(['memberPimcore' => $memberPimcore]);
         return $next($request);

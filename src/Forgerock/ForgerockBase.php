@@ -59,9 +59,9 @@ class ForgerockBase
             'json' => $body,
             'headers' => $headers,
             'query' => $queryString,
-            'http_errors' => false
+            'http_errors' => false,
+            'allow_redirects'   => false,
         ]);
-
         return $response;
     }
 }
