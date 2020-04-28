@@ -4,6 +4,7 @@
  */
 
 namespace App\Forgerock\Middlewere;
+
 use App\Forgerock\Exceptions\ForgeRockExceptions;
 use App\Forgerock\Exceptions\FRSignatureInvalidException;
 use App\Forgerock\IdentityManagement;
@@ -19,6 +20,7 @@ use Illuminate\Http\Response;
 class ServiceMiddleware
 {
     use LoggingTrait;
+
     /**
      * Run the request filter.
      *
@@ -32,38 +34,48 @@ class ServiceMiddleware
     {
         $responseCode = 401;
 
+        /** TOKEN REQUIRED */
         if ($request->hasHeader('Authorization')) {
             $authorization = $request->header('Authorization');
-        }
+            $token = null;
+            $authorizationHeader = str_replace('bearer ', '', $authorization);
+            $token = str_replace('Bearer ', '', $authorizationHeader);
 
-        $token = null;
-        $authorizationHeader = str_replace('bearer ', '', $authorization);
-        $token = str_replace('Bearer ', '', $authorizationHeader);
+            try {
+                $sessionManagement = new SessionManagement();
+                $decodedData = $sessionManagement->validateToken($token);
+            } catch (SignatureInvalidException $e) {
+                $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
+                throw new FRSignatureInvalidException(["token" => [$e->getMessage()]], Response::HTTP_UNPROCESSABLE_ENTITY, "AUTH422");
+            } catch (ExpiredException $e) {
+                $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
+                throw new ForgeRockExceptions(["token" => [$e->getMessage()]],Response::HTTP_UNAUTHORIZED, "AUTH401");
+            } catch (\Exception $e) {
+                $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
+                throw new ForgeRockExceptions(["token" => [$e->getMessage()]], Response::HTTP_INTERNAL_SERVER_ERROR, "AUTH500");
+            }
 
-        try {
-            $sessionManagement = new SessionManagement();
-            $decodedData = $sessionManagement->validateToken($token);
-        } catch (SignatureInvalidException $e) {
-            $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
-            throw new FRSignatureInvalidException($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY, Response::HTTP_UNPROCESSABLE_ENTITY);
-        } catch (ExpiredException $e) {
-            $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
-            throw new ForgeRockExceptions($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY, Response::HTTP_UNPROCESSABLE_ENTITY);
-        } catch (\Exception $e) {
-            $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
-            throw new ForgeRockExceptions($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, Response::HTTP_INTERNAL_SERVER_ERROR);
+            $identityManagement = new IdentityManagement();
+            try {
+                $memberForgeRock = $identityManagement->getMe($token);
+            } catch (\Exception $e) {
+                throw new ForgeRockExceptions(["token" => [$e->getMessage()]], Response::HTTP_INTERNAL_SERVER_ERROR, "AUTH500");
+            }
+            $memberPimcore = MemberPimcore::Instance($memberForgeRock);
+            $request->request->add(['memberForgeRock' => $memberForgeRock]);
+            $request->request->add(['memberPimcore' => $memberPimcore]);
+            return $next($request);
+        } else {
+            return response()->json([
+                'status' => false,
+                'code' => "AUTH401",
+                'message' => null,
+                'error_message' => [
+                    "token" => [__("message.required")]
+                ],
+                'data' => null
+            ], $responseCode);
         }
-
-        $identityManagement = new IdentityManagement();
-        try {
-            $memberForgeRock = $identityManagement->getMe($token);
-        } catch (\Exception $e) {
-            throw new ForgeRockExceptions($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-        $memberPimcore = MemberPimcore::Instance($memberForgeRock);
-        $request->request->add(['memberForgeRock' => $memberForgeRock]);
-        $request->request->add(['memberPimcore' => $memberPimcore]);
-        return $next($request);
     }
 
 }

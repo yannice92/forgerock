@@ -8,15 +8,15 @@ namespace App\Forgerock\Exceptions;
 
 class ForgeRockBaseException extends \Exception
 {
-    protected $message;
+    protected $errorMessage;
 
     protected $httpCode;
 
     protected $error_code;
 
-    public function __construct(string $message = 'error', int $httpCode = 400, int $code = 1)
+    public function __construct(string $errorMessage = 'error', int $httpCode = 400, string $code = "0")
     {
-        $this->message = $message;
+        $this->errorMessage = $errorMessage;
         $this->httpCode = $httpCode;
         $this->code = $code;
     }
@@ -26,8 +26,8 @@ class ForgeRockBaseException extends \Exception
         return response()->json([
             'status' => false,
             'code' => $this->code,
-            'message' => $this->message,
-            'error_message' => $this->message,
+            'message' => null,
+            'errorMessage' => $this->errorMessage,
             'data' => null
         ], $this->httpCode);
     }

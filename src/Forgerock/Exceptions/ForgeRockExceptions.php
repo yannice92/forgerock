@@ -12,12 +12,12 @@ namespace App\Forgerock\Exceptions;
 class ForgeRockExceptions extends ForgeRockBaseException
 {
     protected $code;
-    protected $message;
+    protected $errorMessage;
     protected $httpCode;
 
-    public function __construct(string $message = 'error', int $httpCode = 400, int $code = 400)
+    public function __construct(array $errorMessage = ['error'], int $httpCode = 400, string $code = "400")
     {
-        $this->message = $message;
+        $this->errorMessage = $errorMessage;
         $this->httpCode = $httpCode;
         $this->code = $code;
     }
