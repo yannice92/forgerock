@@ -70,7 +70,7 @@ class ForgerockMiddleware
                 'status' => false,
                 'code' => "AUTH401",
                 'message' => null,
-                'error_message' => [
+                'errorMessage' => [
                     "token" => [__("message.required")]
                 ],
                 'data' => null

@@ -14,7 +14,7 @@ class ForgeRockBaseException extends \Exception
 
     protected $error_code;
 
-    public function __construct(string $errorMessage = 'error', int $httpCode = 400, string $code = "0")
+    public function __construct(array $errorMessage = ['error'], int $httpCode = 400, string $code = "AUTH99")
     {
         $this->errorMessage = $errorMessage;
         $this->httpCode = $httpCode;

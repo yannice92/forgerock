@@ -14,9 +14,7 @@ class AuthPimcoreException extends ForgeRockBaseException
 
     public function __construct(array $errorMessage = ['error'], int $httpCode = 401, string $code = "401")
     {
-        $this->errorMessage = [
-            "token" => $errorMessage
-        ];
+        $this->errorMessage = $errorMessage;
         $this->httpCode = $httpCode;
         $this->code = $code;
     }
