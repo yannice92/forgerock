@@ -11,6 +11,7 @@ use App\Forgerock\Exceptions\AuthPimcoreException;
 final class MemberPimcore
 {
     private static $instance = null;
+
     /**
      * Private ctor so nobody else can instantiate it
      *
@@ -29,16 +30,14 @@ final class MemberPimcore
         if (self::$instance === null) {
             $member = new  \App\Forgerock\Repositories\MembersRepository(new \Illuminate\Container\Container());
             $result = $member->findBy("forgeRockId", $memberForgeRock->_id);
-            if (count($result) == 1){
+            if (count($result) == 1) {
                 self::$instance = $result[0];
-            }
-            else{
-                throw new AuthPimcoreException("Member not found on apps");
+            } else {
+                throw new AuthPimcoreException(["token" => ["Member not found on apps"]]);
             }
         }
         return self::$instance;
     }
-
 }
 
 
