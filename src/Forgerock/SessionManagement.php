@@ -49,11 +49,11 @@ class SessionManagement extends ForgerockBase
         $decoded = JWT::decode($token, $this->getPEM(), [env('FR_ALG')]);
         $eligibleIIS = explode(',', env('FR_ISS'));
         if (!in_array($decoded->iss, $eligibleIIS)) {
-            throw new ForgeRockExceptions('Not allowed IIS', 401, 1);
+            throw new ForgeRockExceptions(['token' => 'Not allowed IIS'], 401, 1);
         }
 
         if (!in_array($decoded->aud, explode(',', env('FR_VALID_AUD')))) {
-            throw new ForgeRockExceptions('Not valid audience', 401, 2);
+            throw new ForgeRockExceptions(['token' => 'Not valid audience'], 401, 2);
         }
 
         return $decoded;
