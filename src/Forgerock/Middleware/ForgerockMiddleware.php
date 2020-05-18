@@ -61,7 +61,7 @@ class ForgerockMiddleware
                 $memberForgeRock = $identityManagement->getMe($token);
             } catch (\Exception $e) {
                 $this->logging('VERIFY_TOKEN', 'forge-rock', $e->getMessage());
-                throw new ForgeRockExceptions($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, Response::HTTP_INTERNAL_SERVER_ERROR);
+                throw new ForgeRockExceptions(["token" => [$e->getMessage()]], Response::HTTP_INTERNAL_SERVER_ERROR, "AUTH500FR");
             }
             $request->request->add(['memberForgeRock' => $memberForgeRock]);
             return $next($request);
