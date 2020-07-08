@@ -123,15 +123,54 @@ class IdentityManagement extends ForgerockBase
     {
         $metaData = new \StdClass();
         if (isset($this->user->effectiveApplications)) {
-            $duniaGamesApplicationData = Arr::first($this->user->effectiveApplications, function ($value, $key) {
-                return $value->appType === 'duniagames';
+            $applicationData = Arr::first($this->user->effectiveApplications, function ($value, $key) {
+                return $value->appType === env("FR_APPTYPE");
             });
-			if($duniaGamesApplicationData && isset($duniaGamesApplicationData->appMetadata)) {
-				$appMetadata = \GuzzleHttp\json_decode($duniaGamesApplicationData->appMetadata);
-				$this->parseMetaData($appMetadata);
-			}
+            if ($applicationData && isset($applicationData->appMetadata)) {
+                $appMetadata = \GuzzleHttp\json_decode($applicationData->appMetadata);
+                $this->parseMetaData($appMetadata);
+            }
         }
         return $metaData;
+    }
+
+    public function getMetaData()
+    {
+        $appMetadata = new \StdClass();
+        if (isset($this->user->effectiveApplications)) {
+            $applicationData = Arr::first($this->user->effectiveApplications, function ($value, $key) {
+                return $value->appType === env("FR_APPTYPE");
+            });
+            if ($applicationData && isset($applicationData->appMetadata)) {
+                $appMetadata = \GuzzleHttp\json_decode($applicationData->appMetadata);
+            }
+        }
+
+        return $appMetadata;
+    }
+
+    public function storeMetaData($field, array $data, $token)
+    {
+        $metaDataEncode = json_encode($this->getMetaData());
+        $metaDataParse = json_decode($metaDataEncode, true);
+        $arrayMerge = array_merge_recursive($metaDataParse, $data);
+
+        $headers = [
+            'Authorization' => 'Bearer ' . $token,
+            'Accept' => 'application/json',
+            'am-clientid' => env("FR_CLIENTID"),
+            'Content-Type' => 'application/json'
+        ];
+        $body = [
+            ["operation" => "replace",
+                "field" => $field,
+                "value" => json_encode($data)]
+        ];
+
+
+        $result = $this->postRequest(env("FR_DOMAIN") . "/iam/v1/profiles/update/managed/users",
+            "", $body, $headers);
+        return $result;
     }
 
     public function parseMetaData($metaData)
@@ -175,7 +214,7 @@ class IdentityManagement extends ForgerockBase
     {
 
         $telkomselPhoneNumber = Arr::first($userPhoneNumbers, function ($value, $key) use ($paymentPhoneNumber) {
-            if(strpos($paymentPhoneNumber,'+') !== 0){
+            if (strpos($paymentPhoneNumber, '+') !== 0) {
                 $paymentPhoneNumber = '+' . $paymentPhoneNumber;
             }
             $prefix = substr($paymentPhoneNumber, 0, 6);
@@ -187,7 +226,7 @@ class IdentityManagement extends ForgerockBase
 
     public static function isTelkomseNumber($phoneNumber)
     {
-        if(strpos($phoneNumber,'+') !== 0){
+        if (strpos($phoneNumber, '+') !== 0) {
             $phoneNumber = '+' . $phoneNumber;
         }
         $prefix = substr($phoneNumber, 0, 6);
