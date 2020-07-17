@@ -153,7 +153,8 @@ class IdentityManagement extends ForgerockBase
     {
         $metaDataEncode = json_encode($this->getMetaData());
         $metaDataParse = json_decode($metaDataEncode, true);
-        $arrayMerge = array_merge_recursive($metaDataParse, $data);
+
+        $arrayMerge = array_replace_recursive($metaDataParse, $data);
 
         $headers = [
             'Authorization' => 'Bearer ' . $token,
@@ -164,7 +165,7 @@ class IdentityManagement extends ForgerockBase
         $body = [
             ["operation" => "replace",
                 "field" => $field,
-                "value" => json_encode($data)]
+                "value" => json_encode($arrayMerge)]
         ];
 
 
