@@ -11,10 +11,14 @@
     ],
     "minimum-stability": "stable",
     "autoload": {
-        "psr-4": {"App\\Forgerock\\": "src/"}
+        "psr-4": {
+            "App\\Forgerock\\": "src/"
+        }
     },
     "require": {
-        "codercat/jwk-to-pem": "^0.0.3"
+        "codercat/jwk-to-pem": "^0.0.3",
+        "predis/predis": "^1.1",
+        "illuminate/redis": "^6.14"
     }
 }
 

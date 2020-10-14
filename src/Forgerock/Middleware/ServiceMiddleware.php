@@ -57,7 +57,7 @@ class ServiceMiddleware
 
             $identityManagement = new IdentityManagement();
             try {
-                $memberForgeRock = $identityManagement->getMe($token);
+                $memberForgeRock = $identityManagement->getMe($token, $decodedData);
             } catch (\Exception $e) {
                 throw new ForgeRockExceptions(["token" => [$e->getMessage()]], Response::HTTP_INTERNAL_SERVER_ERROR, "AUTH500");
             }
